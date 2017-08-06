@@ -2,12 +2,14 @@ package org.pack.mongo.services;
 
 import java.util.Arrays;
 import java.util.Iterator;
+import java.util.Scanner;
 import java.util.Set;
 
 import org.bson.Document;
 
 import com.mongodb.MongoClient;
 import com.mongodb.ServerAddress;
+import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.MongoIterable;
@@ -15,6 +17,7 @@ import com.mongodb.client.MongoIterable;
 public class CreateMongoDBDocument {
 
 	public static void main(String[] args) {
+		CreateMongoDBDocument createMongoDBDocument = new CreateMongoDBDocument();
 		MongoClient mongoClient = null;
 		try {
 			// Create a mongo client
@@ -31,44 +34,77 @@ public class CreateMongoDBDocument {
 				System.out.println(s);
 			}
 
-			createCatalogCollection(mongoDB);
+			
+//			System.out.println("Enter table name to create");
+//			String tableToCreate = sysConsole.readLine();
+//			System.out.println(tableToCreate);
+//			MongoCollection<Document> coll = createMongoDBDocument.createTableAndInsertData(mongoDB, tableToCreate);
+//			createMongoDBDocument.readDBCollectionInfo(coll);
+
+			Scanner sc = new Scanner(System.in);
+		     String tableToRead = sc.nextLine();
+			
+			System.out.println(tableToRead);
+			createMongoDBDocument.readTableData(mongoDB, tableToRead);
+			
 			
 
-			/*
-			 * The MongoCollection<TDocument> interface provides overloaded
-			 * find() method to find a Document instance. Next, obtain the
-			 * document added using the find() method. Furthermore, the find()
-			 * method returns an iterable collection from which we obtain the
-			 * first document using the first() method.
-			 */
-			Document dbObj = coll.find().first();
-
-			/*
-			 * Output the Document object found as such and also by iterating
-			 * over the Set<E> obtained from the Document using the keySet()
-			 * method. The keySet() method returns a Set<String>. Create an
-			 * Iterator from the Set<String> using the iterator() method. While
-			 * the Iterator has elements as determined by the hasNext() method,
-			 * obtain the elements using the next() method. Each element is a
-			 * key in the Document fetched. Obtain the value for the key using
-			 * the get(String key) method in Document.
-			 */
-			System.out.println(dbObj);
-			Set<String> set = dbObj.keySet();
-			Iterator<String> iter = set.iterator();
-			while (iter.hasNext()) {
-				String obj = iter.next();
-				System.out.println(obj);
-				System.out.println(dbObj.get(obj));
-			}
-
 		} finally {
+			System.out.println("Conn closed !");
 			mongoClient.close();
 		}
 
 	}
 
-	private static void createCatalogCollection(MongoDatabase mongoDB) {
+	private void readDBCollectionInfo(MongoCollection<Document> coll) {
+		/*
+		 * The MongoCollection<TDocument> interface provides overloaded
+		 * find() method to find a Document instance. Next, obtain the
+		 * document added using the find() method. Furthermore, the find()
+		 * method returns an iterable collection from which we obtain the
+		 * first document using the first() method.
+		 */
+		Document dbObj = coll.find().first();
+
+		/*
+		 * Output the Document object found as such and also by iterating
+		 * over the Set<E> obtained from the Document using the keySet()
+		 * method. The keySet() method returns a Set<String>. Create an
+		 * Iterator from the Set<String> using the iterator() method. While
+		 * the Iterator has elements as determined by the hasNext() method,
+		 * obtain the elements using the next() method. Each element is a
+		 * key in the Document fetched. Obtain the value for the key using
+		 * the get(String key) method in Document.
+		 */
+		System.out.println("DB Object : " + dbObj);
+		Set<String> set = dbObj.keySet();
+		Iterator<String> iter = set.iterator();
+		while (iter.hasNext()) {
+			String obj = iter.next();
+			System.out.println(obj);
+			System.out.println(dbObj.get(obj));
+		}
+	}
+
+	private void iterateDocument(Document document) {
+		Set<String> rowKeys = document.keySet();
+		Iterator<String> rowKeyIterator = rowKeys.iterator();
+		int count = 1;
+		while(rowKeyIterator.hasNext()) {
+			String key = rowKeyIterator.next();
+			System.out.println("Record " + count++ + " : " + key + ", " + document.get(key));
+		}
+	}
+	
+	private void readTableData(MongoDatabase mongoDB, String tableToCreate) {
+		MongoCollection<Document> coll = mongoDB.getCollection(tableToCreate);
+		FindIterable<Document> documents = coll.find();
+		for(Document tempDocument : documents) {
+			iterateDocument(tempDocument);
+		}
+	}
+	
+	private MongoCollection<Document> createTableAndInsertData(MongoDatabase mongoDB, String tableToCreate) {
 		/*
 		 * create a new MongoCollection<Document>instance using the
 		 * getCollection(String collectionName) method in MongoDatabase.
@@ -76,7 +112,7 @@ public class CreateMongoDBDocument {
 		 * collection gets created implicitly when the getCollection(String)
 		 * method is invoked.
 		 */
-		MongoCollection<Document> coll = mongoDB.getCollection("catalog");
+		MongoCollection<Document> coll = mongoDB.getCollection(tableToCreate);
 
 		/*
 		 * Create a Document instance using the Document(String key, Object
@@ -97,6 +133,8 @@ public class CreateMongoDBDocument {
 		 * MongoCollection<TDocument> instance for the catalog collection.
 		 */
 		coll.insertOne(catalog);
+		
+		return coll;
 	}
 
 }
