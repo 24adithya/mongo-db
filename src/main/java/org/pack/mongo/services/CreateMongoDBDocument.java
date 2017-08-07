@@ -41,14 +41,9 @@ public class CreateMongoDBDocument {
 //			MongoCollection<Document> coll = createMongoDBDocument.createTableAndInsertData(mongoDB, tableToCreate);
 //			createMongoDBDocument.readDBCollectionInfo(coll);
 
-			Scanner sc = new Scanner(System.in);
-		     String tableToRead = sc.nextLine();
+			ReadMongoDBDocument readMongoDBDocument = new ReadMongoDBDocument();
+			readMongoDBDocument.readTableData(mongoDB);
 			
-			System.out.println(tableToRead);
-			createMongoDBDocument.readTableData(mongoDB, tableToRead);
-			
-			
-
 		} finally {
 			System.out.println("Conn closed !");
 			mongoClient.close();
@@ -83,24 +78,6 @@ public class CreateMongoDBDocument {
 			String obj = iter.next();
 			System.out.println(obj);
 			System.out.println(dbObj.get(obj));
-		}
-	}
-
-	private void iterateDocument(Document document) {
-		Set<String> rowKeys = document.keySet();
-		Iterator<String> rowKeyIterator = rowKeys.iterator();
-		int count = 1;
-		while(rowKeyIterator.hasNext()) {
-			String key = rowKeyIterator.next();
-			System.out.println("Record " + count++ + " : " + key + ", " + document.get(key));
-		}
-	}
-	
-	private void readTableData(MongoDatabase mongoDB, String tableToCreate) {
-		MongoCollection<Document> coll = mongoDB.getCollection(tableToCreate);
-		FindIterable<Document> documents = coll.find();
-		for(Document tempDocument : documents) {
-			iterateDocument(tempDocument);
 		}
 	}
 	

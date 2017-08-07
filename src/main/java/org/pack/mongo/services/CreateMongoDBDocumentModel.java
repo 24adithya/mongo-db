@@ -8,6 +8,7 @@ import org.bson.Document;
 
 import com.mongodb.MongoClient;
 import com.mongodb.ServerAddress;
+import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 
 public class CreateMongoDBDocumentModel {
@@ -25,7 +26,11 @@ public class CreateMongoDBDocumentModel {
 			CreateMongoDBDocumentModel createMongoDBDocumentModel = new CreateMongoDBDocumentModel();
 			
 			//Insert multiple records
-			createMongoDBDocumentModel.insertMultipleRecords(mongoDB);
+//			createMongoDBDocumentModel.insertMultipleRecords(mongoDB);
+			createMongoDBDocumentModel.insertMultipleRecordsVariant(mongoDB);
+			//Iterate over collection
+			ReadMongoDBDocument readMongoDBDocument = new ReadMongoDBDocument();
+			readMongoDBDocument.readTableData(mongoDB);
 		}
 		finally {
 			mongoClient.close();
@@ -34,7 +39,7 @@ public class CreateMongoDBDocumentModel {
 
 	private void insertMultipleRecords(MongoDatabase mongoDB) {
 		
-		mongoDB.getCollection("catalog");
+		MongoCollection<Document> coll = mongoDB.getCollection("catalog");
 		
 		Catalog adamsCatalog = new Catalog("Adams", "Journal1", "Adams publisher", "2017", "King Adams", "Adams");
 		Catalog catalog24 = new Catalog("24", "Journal2", "24 publisher", "2017", "King 24", "24");
@@ -46,6 +51,44 @@ public class CreateMongoDBDocumentModel {
 		List<Document> documentList = new LinkedList<>();
 		documentList.add(documents);
 		
+		coll.insertMany(documentList);
+	}
+	
+	private void insertMultipleRecordsVariant(MongoDatabase mongoDB) {
 		
+		MongoCollection<Document> coll = mongoDB.getCollection("catalog");
+		
+		Catalog adamsCatalog = new Catalog();
+		adamsCatalog.put("catalogId", "Adams");
+		adamsCatalog.put("journal", "Journal1");
+		adamsCatalog.put("publisher", "Adams publisher");
+		adamsCatalog.put("edition", "2017");
+		adamsCatalog.put("title", "King Adams");
+		adamsCatalog.put("author", "Adams");
+		
+//		putInCollection(adamsCatalog, new String[] {"Adams", "Journal1", "Adams publisher", "2017", "King Adams", "Adams"});
+		
+		Catalog catalog24 = new Catalog();
+		catalog24.put("catalogId", "24");
+		catalog24.put("journal", "Journal2");
+		catalog24.put("publisher", "24 publisher");
+		catalog24.put("edition", "2017");
+		catalog24.put("title", "King 24");
+		catalog24.put("author", "24");
+		
+		Document documents = new Document();
+		documents.append("adams", adamsCatalog);
+		documents.append("24", catalog24);
+		
+		List<Document> documentList = new LinkedList<>();
+		documentList.add(documents);
+		
+		coll.insertMany(documentList);
+	}
+	
+	private void putInCollection(Catalog catalog, String[] values) {
+		for(String tempString : values) {
+			catalog.put(tempString, tempString);
+		}
 	}
 }
