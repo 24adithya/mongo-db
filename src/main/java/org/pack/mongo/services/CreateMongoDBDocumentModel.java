@@ -21,16 +21,21 @@ public class CreateMongoDBDocumentModel {
 
 			// Get defauly DB by the name 'local'
 			MongoDatabase mongoDB = mongoClient.getDatabase("local");
+			
+			CreateMongoDBDocumentModel createMongoDBDocumentModel = new CreateMongoDBDocumentModel();
+			
+			//Insert multiple records
+			createMongoDBDocumentModel.insertMultipleRecords(mongoDB);
 		}
 		finally {
 			mongoClient.close();
 		}
-		
-		CreateMongoDBDocumentModel createMongoDBDocumentModel = new CreateMongoDBDocumentModel();
-		createMongoDBDocumentModel.insertMultipleRecords();
 	}
 
-	private void insertMultipleRecords() {
+	private void insertMultipleRecords(MongoDatabase mongoDB) {
+		
+		mongoDB.getCollection("catalog");
+		
 		Catalog adamsCatalog = new Catalog("Adams", "Journal1", "Adams publisher", "2017", "King Adams", "Adams");
 		Catalog catalog24 = new Catalog("24", "Journal2", "24 publisher", "2017", "King 24", "24");
 		
