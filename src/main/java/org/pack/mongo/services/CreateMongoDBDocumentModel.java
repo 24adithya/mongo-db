@@ -76,12 +76,9 @@ public class CreateMongoDBDocumentModel {
 		catalog24.put("title", "King 24");
 		catalog24.put("author", "24");
 		
-		Document documents = new Document();
-		documents.append("adams", adamsCatalog);
-		documents.append("24", catalog24);
-		
 		List<Document> documentList = new LinkedList<>();
-		documentList.add(documents);
+		documentList.add(new Document("_id", "Adams").append("adams", adamsCatalog));
+		documentList.add(new Document("_id", "24").append("24", catalog24));
 		
 		coll.insertMany(documentList);
 	}
