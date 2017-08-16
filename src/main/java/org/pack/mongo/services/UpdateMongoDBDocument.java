@@ -1,6 +1,7 @@
 package org.pack.mongo.services;
 
 import java.util.Arrays;
+import java.util.Map;
 import java.util.Scanner;
 
 import org.bson.Document;
@@ -30,6 +31,11 @@ public class UpdateMongoDBDocument {
 			System.out.println("Enter document id to update data");
 			String documentToUpdate = sc.nextLine();
 			
+			boolean updateMap = false;
+			if(coll.find(new Document("_id", documentToUpdate)).first().get(documentToUpdate) instanceof Map) {
+				updateMap = true;
+			}
+			
 			System.out.println("Enter columns/keys to update data");
 			String columnsToUpdate = sc.nextLine();
 			String[] columnsToUpdateArray = columnsToUpdate.split(" ");
@@ -41,9 +47,11 @@ public class UpdateMongoDBDocument {
 			Document newDocument = new Document();
 			int count = 0;
 			for(String tempColumn : columnsToUpdateArray) {
-				newDocument.append(documentToUpdate + "." + tempColumn, columnValuesArray[count++]);
+				if(updateMap) {
+					tempColumn = documentToUpdate + "." + tempColumn;
+				}
+				newDocument.append(tempColumn, columnValuesArray[count++]);
 			}
-			
 			coll.updateOne(new Document("_id", documentToUpdate),new Document("$set", newDocument));
 			
 		} catch (Exception e) {
